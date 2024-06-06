@@ -20,7 +20,6 @@ class TasksCubit extends Cubit<TasksState> {
 
       emit(state.copyWith(tasksList: solvedTasks, link: link));
     } catch (e) {
-      print(e);
       emit(state.copyWith(error: e.toString(), isLoading: false));
     }
   }

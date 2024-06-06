@@ -30,7 +30,6 @@ class FetchDataException extends AppException {
 
 class ExeptionsHandlers {
   String getExeptionString(error) {
-    print(error.toString());
     if (error is BadRequestException) {
       return findErrorMessage(error);
     } else if (error is InternalServerException) {

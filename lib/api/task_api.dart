@@ -7,7 +7,6 @@ class TaskApiClient {
   static const String baseUrl = 'https://flutter.webspark.dev/flutter/api';
 
   Future<dynamic> getTasks(String link) async {
-    // final queryParameters = {"id": "7d785c38-cd54-4a98-ab57-44e50ae646c1"};
     final uri = Uri.parse(baseUrl);
 
     try {
@@ -19,7 +18,6 @@ class TaskApiClient {
       );
       return processResponce(response);
     } catch (e) {
-      print(e);
       throw ExeptionsHandlers().getExeptionString(e);
     }
   }
@@ -42,7 +40,6 @@ class TaskApiClient {
 }
 
 dynamic processResponce(http.Response response) {
-  print('${response.statusCode} ${response.body}}');
   switch (response.statusCode) {
     case 200:
       return json.decode(response.body)['data'];
