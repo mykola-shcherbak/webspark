@@ -4,67 +4,66 @@ import 'package:spark/model/task_model.dart';
 Task solveTask(Task task) {
   final List<int> start = coorditateToList(task.start);
   final List<int> end = coorditateToList(task.end);
-  final List<List<int>> freeCells =
-      fieldToCoordinate(task.field).map((e) => coorditateToList(e)).toList();
+
+  final List<List<int>> freeCells = findFreeCells(task.field);
 
   List<int> currentPostion = [...start];
   final List<List<int>> steps = [start];
 
-  void stepBack(List<int> cur) {
-    freeCells.removeWhere((e) => listEquals(e, cur));
+  void removeFromFreeCells(List<int> cell) {
+    freeCells.removeWhere((e) => listEquals(e, cell));
   }
 
-  List<List<int>> findStep(List<int> cur) {
-    List<List<int>> newList = [];
-    for (var e in freeCells) {
-      if ((cur[0] >= e[0] - 1 && cur[0] <= e[0] + 1) &&
-          (cur[1] >= e[1] - 1 && cur[1] <= e[1] + 1) &&
-          !listEquals(cur, e)) {
-        newList.add(e);
-      }
-    }
-    return newList;
+  bool checkIfCellIsFree(List<int> cell) {
+    return freeCells.any((e) => listEquals(e, cell));
   }
 
-  List<int>? checkFastest(List<int> cur, {int x = 0, int y = 0}) {
-    List<List<int>> field;
-    if (freeCells.any((e) => listEquals(e, [cur[0] + x, cur[1] + y]))) {
-      return [cur[0] + x, cur[1] + y];
-    } else if (freeCells.any((e) => listEquals(e, [cur[0], cur[1] + y])) &&
-        y != 0) {
-      return [cur[0], cur[1] + y];
-    } else if (freeCells.any((e) => listEquals(e, [cur[0] + x, cur[1]])) &&
-        x != 0) {
-      return [cur[0] + x, cur[1]];
+  List<int> findNeighbor(List<int> current) {
+    List<int> neighbor = freeCells.firstWhere((e) =>
+        (current[0] >= e[0] - 1 && current[0] <= e[0] + 1) &&
+        (current[1] >= e[1] - 1 && current[1] <= e[1] + 1) &&
+        !listEquals(current, e));
+    return neighbor;
+  }
+
+  List<int>? findFastestWay(List<int> current, List<int> direction) {
+    List<int> stepXY = [current[0] + direction[0], current[1] + direction[1]];
+    List<int> stepX = [current[0] + direction[0], direction[1]];
+    List<int> stepY = [direction[0], current[1] + direction[1]];
+    if (checkIfCellIsFree(stepXY)) {
+      return stepXY;
+    } else if (direction[0] != 0 && checkIfCellIsFree(stepX)) {
+      return stepX;
+    } else if (direction[1] != 0 && checkIfCellIsFree(stepY)) {
+      return stepY;
     } else {
-      field = findStep(cur);
-      stepBack(cur);
-      return field[0];
+      List<int> neighbor = findNeighbor(current);
+      removeFromFreeCells(current);
+      return neighbor;
     }
   }
 
-  int compare(int cur, int end) {
-    if (cur < end) {
+  int compare(int current, int end) {
+    if (current < end) {
       return 1;
-    } else if (cur > end) {
+    } else if (current > end) {
       return -1;
     }
     return 0;
   }
 
-  List<int> compareList(List<int> cur) {
+  List<int> findDirectinon(List<int> current) {
     List<int> result = [0, 0];
-    result[0] = compare(cur[0], end[0]);
-    result[1] = compare(cur[1], end[1]);
+    result[0] = compare(current[0], end[0]);
+    result[1] = compare(current[1], end[1]);
 
     return result;
   }
 
   while (!listEquals(currentPostion, end)) {
-    List<int> directinon = compareList(currentPostion);
+    List<int> directinon = findDirectinon(currentPostion);
+    List<int>? newStep = findFastestWay(currentPostion, directinon);
 
-    List<int>? newStep =
-        checkFastest(currentPostion, x: directinon[0], y: directinon[1]);
     if (newStep != null) {
       currentPostion = newStep;
       steps.add(newStep);
@@ -81,13 +80,13 @@ List<int> coorditateToList(Coordinates coordinate) {
   return [coordinate.x, coordinate.y];
 }
 
-List<Coordinates> fieldToCoordinate(List<String> field) {
-  List<Coordinates> freePath = [];
+List<List<int>> findFreeCells(List<String> field) {
+  List<List<int>> freePath = [];
 
   for (int i = 0; i < field.length; i++) {
     for (int z = 0; z < field[i].length; z++) {
       if (field[i][z] == '.') {
-        freePath.add(Coordinates(z, i));
+        freePath.add(coorditateToList(Coordinates(z, i)));
       }
     }
   }

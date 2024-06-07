@@ -31,19 +31,21 @@ class FetchDataException extends AppException {
 class ExeptionsHandlers {
   String getExeptionString(error) {
     if (error is BadRequestException) {
-      return findErrorMessage(error);
+      return findExceptionMessage(error);
     } else if (error is InternalServerException) {
-      return findErrorMessage(error);
+      return findExceptionMessage(error);
     } else if (error is TooManyRequestsException) {
-      return findErrorMessage(error);
+      return findExceptionMessage(error);
     } else {
       return TextConstants.unknownError;
     }
   }
 
-  String findErrorMessage(AppException error) {
-    return (error.message == null || error.message == '')
-        ? error.prefix.toString()
-        : error.message.toString();
+  String findExceptionMessage(AppException error) {
+    if (error.message != '') {
+      return error.message.toString();
+    } else {
+      return error.prefix.toString();
+    }
   }
 }

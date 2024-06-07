@@ -44,13 +44,24 @@ dynamic processResponce(http.Response response) {
     case 200:
       return json.decode(response.body)['data'];
     case 400:
-      throw BadRequestException(jsonDecode(response.body)['message']);
+      throw BadRequestException(findRespoMessage(jsonDecode(response.body)));
     case 429:
-      throw TooManyRequestsException(jsonDecode(response.body)['message']);
+      throw TooManyRequestsException(
+          findRespoMessage(jsonDecode(response.body)));
     case 500:
-      throw InternalServerException(jsonDecode(response.body)['message']);
+      throw InternalServerException(
+          findRespoMessage(jsonDecode(response.body)));
     default:
       throw FetchDataException(
           '${TextConstants.fetchError} ${response.statusCode}');
   }
+}
+
+String findRespoMessage(body) {
+  if (body['message'] != null && body['message'] != '') {
+    return body.message.toString();
+  } else if (body['data']['message'] != null && body['data']['message'] != '') {
+    return body['data']['message'].toString();
+  }
+  return '';
 }
